@@ -20,10 +20,8 @@ class Product extends BaseEntity
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 2)]
     private ?string $price = null;
 
-    public const PROCESSORS = [
-        'paypal',
-        'stripe'
-    ];
+    public const PROCESSOR_PAYPAL = 'paypal';
+    public const PROCESSOR_STRIPE = 'stripe';
 
     public function getId(): ?int
     {

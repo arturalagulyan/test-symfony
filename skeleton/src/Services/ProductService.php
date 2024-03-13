@@ -5,6 +5,10 @@ namespace App\Services;
 use App\Entity\Coupon;
 use App\Entity\Product;
 use App\Entity\TaxNumber;
+use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use Systemeio\TestForCandidates\PaymentProcessor\PaypalPaymentProcessor;
+use Systemeio\TestForCandidates\PaymentProcessor\StripePaymentProcessor;
 
 /**
  * Class ProductService
@@ -13,12 +17,47 @@ use App\Entity\TaxNumber;
 class ProductService extends BaseService
 {
     /**
-     * @param array $data
-     * @return bool
+     * ProductService constructor.
+     * @param EntityManagerInterface $entityManager
+     * @param PaypalPaymentProcessor $paypalPaymentProcessor
+     * @param StripePaymentProcessor $stripePaymentProcessor
      */
-    public function purchase(array $data = []): bool
+    public function __construct(
+        protected EntityManagerInterface $entityManager,
+        protected PaypalPaymentProcessor $paypalPaymentProcessor,
+        protected StripePaymentProcessor $stripePaymentProcessor,
+    )
     {
-        return true;
+        parent::__construct($entityManager);
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    public function purchase(array $data = []): array
+    {
+        $price = $this->calculatePrice($data);
+        $processor = $data['paymentProcessor'];
+
+        if ($processor === Product::PROCESSOR_PAYPAL) {
+            try {
+                $this->paypalPaymentProcessor->pay(intval($price));
+            } catch (Exception $exception) {
+                return [
+                    'error' => "Something went wrong in $processor"
+                ];
+            }
+        }
+        if ($processor === Product::PROCESSOR_STRIPE && !$this->stripePaymentProcessor->processPayment($price)) {
+            return [
+                'error' => "Something went wrong in $processor"
+            ];
+        }
+
+        return [
+            'message' => "Paid $price via $processor"
+        ];
     }
 
     /**

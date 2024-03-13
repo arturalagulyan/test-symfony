@@ -35,7 +35,7 @@ class PurchaseDto extends BaseDto
         public ?string $couponCode,
 
         #[Assert\NotBlank]
-        #[Assert\Choice(choices: Product::PROCESSORS, message: 'Choose a valid processor.')]
+        #[Assert\Choice(choices: [Product::PROCESSOR_PAYPAL, Product::PROCESSOR_STRIPE], message: 'Choose a valid processor.')]
         public string $paymentProcessor,
     ) {
     }

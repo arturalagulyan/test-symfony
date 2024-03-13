@@ -26,8 +26,8 @@ class Coupon extends BaseEntity
     #[ORM\Column(length: 10, unique: true)]
     private ?string $code = null;
 
-    const TYPE_VALUE = 1;
-    const TYPE_PERCENT = 2;
+    public const TYPE_VALUE = 1;
+    public const TYPE_PERCENT = 2;
 
     public function getId(): ?int
     {
